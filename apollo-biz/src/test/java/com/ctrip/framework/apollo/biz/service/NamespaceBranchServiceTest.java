@@ -31,6 +31,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.Arrays;
+
 public class NamespaceBranchServiceTest extends AbstractIntegrationTest {
 
   @Autowired
@@ -82,7 +84,19 @@ public class NamespaceBranchServiceTest extends AbstractIntegrationTest {
     Assert.assertEquals(ReleaseOperation.APPLY_GRAY_RULES, releaseHistory.getOperation());
     Assert.assertEquals(0, releaseHistory.getReleaseId());
     Assert.assertEquals(0, releaseHistory.getPreviousReleaseId());
-    Assert.assertTrue(releaseHistory.getOperationContext().contains(rule.getRules()));
+
+    String releaseHistoryContext = releaseHistory.getOperationContext();
+    String[] releaseHistoryArray = releaseHistoryContext.substring(releaseHistoryContext.lastIndexOf("{") + 1,
+                                                                   releaseHistoryContext.indexOf("}")).split(",");
+    Arrays.sort(releaseHistoryArray);
+    String releaseStr = String.join(",", releaseHistoryArray);
+
+    String rules = rule.getRules();
+    String[] rulesArray = rules.substring(rules.lastIndexOf("{") + 1, rules.indexOf("}")).split(",");
+    Arrays.sort(rulesArray);
+    String rulesStr = String.join(",", rulesArray);
+
+    Assert.assertEquals(releaseStr, rulesStr);
   }
 
   @Test
